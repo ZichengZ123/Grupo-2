@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "A quiz score result for the MPS and CNC mechatronics station evaluation.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name or alias of the student or participant",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "score": {
+          "type": "integer",
+          "description": "Number of correct answers out of 6",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "totalQuestions": {
+          "type": "integer",
+          "description": "Total number of questions evaluated",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "timeSeconds": {
+          "type": "integer",
+          "description": "Total elapsed time in seconds to complete the quiz",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp string when the result was recorded",
+          "maxLength": 40
+        },
+        "device": {
+          "type": "string",
+          "description": "Device type (Móvil, Tablet, Escritorio)",
+          "maxLength": 30
+        }
+      },
+      "required": ["name", "score", "totalQuestions", "timeSeconds", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/leaderboard/{entryId}": {
+      "schema": "LeaderboardEntry",
+      "description": "Public ranking collection storing student evaluation results ordered by score descending and time ascending."
+    }
+  }
+}

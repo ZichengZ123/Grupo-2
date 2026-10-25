@@ -1,0 +1,6 @@
+{
+  "name": "Estaciones MPS y Manufactura Automatizada - UPS",
+  "description": "Presentación interactiva con simulación 3D Three.js, videos reales y control táctil sobre las 4 estaciones MPS y CNC de Mecatrónica.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

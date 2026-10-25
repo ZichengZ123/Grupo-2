@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny all unknown collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidLeaderboardEntry(entry) {
+      return entry.keys().hasAll(['name', 'score', 'totalQuestions', 'timeSeconds', 'createdAt'])
+        && entry.keys().hasOnly(['name', 'score', 'totalQuestions', 'timeSeconds', 'createdAt', 'device'])
+        && entry.name is string && entry.name.size() >= 2 && entry.name.size() <= 60
+        && entry.score is int && entry.score >= 0 && entry.score <= 6
+        && entry.totalQuestions is int && entry.totalQuestions >= 1 && entry.totalQuestions <= 10
+        && entry.timeSeconds is int && entry.timeSeconds >= 1 && entry.timeSeconds <= 3600
+        && entry.createdAt is string && entry.createdAt.size() <= 40
+        && (!('device' in entry) || (entry.device is string && entry.device.size() <= 30));
+    }
+
+    // Public competitive leaderboard for Mechatronics Quiz evaluation
+    match /leaderboard/{entryId} {
+      allow get, list: if true;
+      allow create: if isValidId(entryId) && isValidLeaderboardEntry(request.resource.data);
+      allow update, delete: if false;
+    }
+  }
+}

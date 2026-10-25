@@ -36,6 +36,9 @@ export const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
   if (!isOpen) return null;
 
   const currentStation = STATIONS.find((s) => s.id === selectedStationId) || STATIONS[0];
+  const totalPhotos = currentStation.photos?.length || 0;
+  const safePhotoIdx = totalPhotos > 0 ? Math.min(selectedPhotoIdx, totalPhotos - 1) : 0;
+  const currentPhoto = totalPhotos > 0 ? currentStation.photos[safePhotoIdx] : '';
 
   return (
     <div
@@ -157,61 +160,69 @@ export const PdfViewerModal: React.FC<PdfViewerModalProps> = ({
             <div className="w-full h-full p-4 flex flex-col justify-between">
               {/* Photo Viewport */}
               <div className="relative flex-1 w-full rounded-2xl overflow-hidden bg-black/60 flex items-center justify-center">
-                <img
-                  src={currentStation.photos[selectedPhotoIdx]}
-                  alt={`Página de ${currentStation.pdfName}`}
-                  className="max-h-full max-w-full object-contain shadow-2xl"
-                />
+                {currentPhoto && (
+                  <img
+                    src={currentPhoto}
+                    alt={`Página de ${currentStation.pdfName}`}
+                    className="max-h-full max-w-full object-contain shadow-2xl"
+                  />
+                )}
 
                 {/* Left / Right arrows */}
-                <button
-                  onClick={() => {
-                    soundEffects.playClick();
-                    setSelectedPhotoIdx((prev) =>
-                      prev === 0 ? currentStation.photos.length - 1 : prev - 1
-                    );
-                  }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white border border-slate-700 transition"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
+                {totalPhotos > 1 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        soundEffects.playClick();
+                        setSelectedPhotoIdx((prev) =>
+                          prev === 0 ? totalPhotos - 1 : prev - 1
+                        );
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white border border-slate-700 transition"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
 
-                <button
-                  onClick={() => {
-                    soundEffects.playClick();
-                    setSelectedPhotoIdx((prev) =>
-                      prev === currentStation.photos.length - 1 ? 0 : prev + 1
-                    );
-                  }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white border border-slate-700 transition"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+                    <button
+                      onClick={() => {
+                        soundEffects.playClick();
+                        setSelectedPhotoIdx((prev) =>
+                          prev === totalPhotos - 1 ? 0 : prev + 1
+                        );
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white border border-slate-700 transition"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
 
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/90 border border-slate-700 px-3.5 py-1 rounded-full text-xs font-mono text-cyan-300">
-                  Fotografía #{selectedPhotoIdx + 1} de {currentStation.photos.length} — {currentStation.shortName}
+                  Fotografía #{safePhotoIdx + 1} de {totalPhotos} — {currentStation.shortName}
                 </div>
               </div>
 
               {/* Thumbnail Strip */}
-              <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1" data-prevent-swipe>
-                {currentStation.photos.map((p, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      soundEffects.playClick();
-                      setSelectedPhotoIdx(idx);
-                    }}
-                    className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition ${
-                      selectedPhotoIdx === idx
-                        ? 'border-cyan-400 ring-2 ring-cyan-500/30'
-                        : 'border-slate-800 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={p} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
+              {totalPhotos > 0 && (
+                <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1" data-prevent-swipe>
+                  {currentStation.photos.map((p, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        soundEffects.playClick();
+                        setSelectedPhotoIdx(idx);
+                      }}
+                      className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition ${
+                        safePhotoIdx === idx
+                          ? 'border-cyan-400 ring-2 ring-cyan-500/30'
+                          : 'border-slate-800 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={p} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">

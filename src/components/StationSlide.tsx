@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StationData } from '../types/presentation';
 import { ThreeScene } from './ThreeScene';
 import {
@@ -29,6 +29,15 @@ export const StationSlide: React.FC<StationSlideProps> = ({ station, onOpenPdf }
   const [activeInfoTab, setActiveInfoTab] = useState<'controllers' | 'actuators' | 'sensors'>('controllers');
   const [selectedPhotoIdx, setSelectedPhotoIdx] = useState<number>(0);
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+
+  // Reset photo index when station changes
+  useEffect(() => {
+    setSelectedPhotoIdx(0);
+  }, [station.id]);
+
+  const totalPhotos = station.photos && station.photos.length > 0 ? station.photos.length : 0;
+  const safePhotoIdx = totalPhotos > 0 ? Math.min(selectedPhotoIdx, totalPhotos - 1) : 0;
+  const currentPhoto = totalPhotos > 0 ? station.photos[safePhotoIdx] : '';
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-4 flex flex-col gap-6 animate-fadeIn">
@@ -186,64 +195,86 @@ export const StationSlide: React.FC<StationSlideProps> = ({ station, onOpenPdf }
               <div className="relative w-full h-[520px] rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl flex flex-col p-4">
                 {/* Main Large Photo */}
                 <div className="relative flex-1 w-full rounded-xl overflow-hidden bg-black/60 flex items-center justify-center group">
-                  <img
-                    src={station.photos[selectedPhotoIdx]}
-                    alt={`Foto ${selectedPhotoIdx + 1} de ${station.name}`}
-                    className="max-h-full max-w-full object-contain cursor-zoom-in transition transform group-hover:scale-105 duration-300"
-                    onClick={() => setLightboxOpen(true)}
-                  />
+                  {currentPhoto ? (
+                    <img
+                      src={currentPhoto}
+                      alt={`Foto ${safePhotoIdx + 1} de ${station.name}`}
+                      className="max-h-full max-w-full object-contain cursor-zoom-in transition transform group-hover:scale-[1.02] duration-300"
+                      onClick={() => setLightboxOpen(true)}
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="text-center text-slate-400 p-8 flex flex-col items-center">
+                      <ImageIcon className="w-12 h-12 text-slate-600 mb-2" />
+                      <p className="text-sm">Sin imágenes disponibles</p>
+                    </div>
+                  )}
+
+                  {/* Top Overlays */}
+                  <div className="absolute top-3 left-3 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 px-3 py-1 rounded-full text-xs font-mono text-cyan-300 shadow-md">
+                    Foto {safePhotoIdx + 1} de {totalPhotos}
+                  </div>
+
                   <button
                     onClick={() => setLightboxOpen(true)}
-                    className="absolute top-3 right-3 p-2 rounded-xl bg-slate-900/80 text-white border border-slate-700 hover:bg-slate-800 transition"
+                    className="absolute top-3 right-3 p-2 rounded-xl bg-slate-900/80 text-white border border-slate-700 hover:bg-slate-800 transition shadow-md"
                     title="Ampliar imagen"
                   >
                     <Maximize2 className="w-4 h-4" />
                   </button>
 
                   {/* Prev / Next photo buttons */}
-                  <button
-                    onClick={() => {
-                      soundEffects.playClick();
-                      setSelectedPhotoIdx((prev) =>
-                        prev === 0 ? station.photos.length - 1 : prev - 1
-                      );
-                    }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-900/80 text-white border border-slate-700 hover:bg-cyan-500 hover:text-slate-950 transition"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      soundEffects.playClick();
-                      setSelectedPhotoIdx((prev) =>
-                        prev === station.photos.length - 1 ? 0 : prev + 1
-                      );
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-900/80 text-white border border-slate-700 hover:bg-cyan-500 hover:text-slate-950 transition"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
+                  {totalPhotos > 1 && (
+                    <>
+                      <button
+                        onClick={() => {
+                          soundEffects.playClick();
+                          setSelectedPhotoIdx((prev) =>
+                            prev === 0 ? totalPhotos - 1 : prev - 1
+                          );
+                        }}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-900/80 text-white border border-slate-700 hover:bg-cyan-500 hover:text-slate-950 transition shadow-lg"
+                        aria-label="Foto anterior"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          soundEffects.playClick();
+                          setSelectedPhotoIdx((prev) =>
+                            prev === totalPhotos - 1 ? 0 : prev + 1
+                          );
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-900/80 text-white border border-slate-700 hover:bg-cyan-500 hover:text-slate-950 transition shadow-lg"
+                        aria-label="Foto siguiente"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 {/* Thumbnail strip */}
-                <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1" data-prevent-swipe>
-                  {station.photos.map((p, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        soundEffects.playClick();
-                        setSelectedPhotoIdx(idx);
-                      }}
-                      className={`relative w-16 h-12 rounded-lg overflow-hidden shrink-0 border-2 transition ${
-                        selectedPhotoIdx === idx
-                          ? 'border-cyan-400 ring-2 ring-cyan-500/30'
-                          : 'border-slate-800 opacity-60 hover:opacity-100'
-                      }`}
-                    >
-                      <img src={p} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
+                {totalPhotos > 0 && (
+                  <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1" data-prevent-swipe>
+                    {station.photos.map((p, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          soundEffects.playClick();
+                          setSelectedPhotoIdx(idx);
+                        }}
+                        className={`relative w-16 h-12 rounded-lg overflow-hidden shrink-0 border-2 transition ${
+                          safePhotoIdx === idx
+                            ? 'border-cyan-400 ring-2 ring-cyan-500/30 opacity-100 scale-105'
+                            : 'border-slate-800 opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={p} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -438,20 +469,20 @@ export const StationSlide: React.FC<StationSlideProps> = ({ station, onOpenPdf }
     </div>
 
       {/* Lightbox for zooming photos */}
-      {lightboxOpen && (
+      {lightboxOpen && currentPhoto && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-md"
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-md"
           onClick={() => setLightboxOpen(false)}
         >
           <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center">
             <img
-              src={station.photos[selectedPhotoIdx]}
+              src={currentPhoto}
               alt="Laboratorio MPS"
               className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
             />
             <div className="mt-3 flex items-center gap-4 text-slate-300 text-sm">
               <span>
-                Foto {selectedPhotoIdx + 1} de {station.photos.length} — {station.name}
+                Foto {safePhotoIdx + 1} de {totalPhotos} — {station.name}
               </span>
               <button
                 onClick={(e) => {

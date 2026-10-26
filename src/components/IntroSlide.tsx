@@ -57,8 +57,8 @@ export const IntroSlide: React.FC<IntroSlideProps> = ({
                 <GraduationCap className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Tutor de Cátedra</div>
-                <div className="text-sm font-bold text-slate-100">{UNIVERSITY_INFO.tutor}</div>
+                <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Profesor</div>
+                <div className="text-sm font-bold text-slate-100">{UNIVERSITY_INFO.professor || UNIVERSITY_INFO.tutor}</div>
               </div>
             </div>
 

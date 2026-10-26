@@ -5,6 +5,7 @@ import { STATIONS, CIM_INTEGRATION_FLOW, QUIZ_QUESTIONS, TEAM_MEMBERS, UNIVERSIT
 test('verify university and group presentation metadata', () => {
   assert.equal(UNIVERSITY_INFO.group, 'Grupo 2');
   assert.match(UNIVERSITY_INFO.course, /TECNOLOGÍAS Y SOFTWARE PARA MECATRÓNICA/i);
+  assert.match(UNIVERSITY_INFO.professor, /[AÁ]ngel Eugenio C[aá]rdenas Cadme/i);
   assert.match(UNIVERSITY_INFO.tutor, /[AÁ]ngel Eugenio C[aá]rdenas Cadme/i);
   assert.equal(TEAM_MEMBERS.length, 7);
 

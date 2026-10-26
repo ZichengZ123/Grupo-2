@@ -6,6 +6,7 @@ export const UNIVERSITY_INFO = {
   career: 'Ingeniería Mecatrónica',
   course: 'TECNOLOGÍAS Y SOFTWARE PARA MECATRÓNICA',
   group: 'Grupo 2',
+  professor: 'Ing. Ángel Eugenio Cárdenas Cadme',
   tutor: 'Ing. Ángel Eugenio Cárdenas Cadme',
   topic: 'Estaciones MPS y Célula de Manufactura Automatizada',
   academicPeriod: 'Período Académico 2026',
